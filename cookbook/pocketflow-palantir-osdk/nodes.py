@@ -14,6 +14,7 @@ All nodes log their prompts and responses to shared["thinking_steps"] for UI tra
 from pocketflow import Node, Flow
 import yaml
 import pandas as pd
+import threading
 from typing import Dict, Any, List, Optional, TYPE_CHECKING
 from utils.call_llm import call_llm, extract_yaml
 from utils.osdk_client import get_osdk_client
@@ -60,6 +61,18 @@ def log_thinking(shared: Dict[str, Any], step_type: str, content: str, level: st
     log_thinking_streaming(shared, step_type, content)
 
 
+class CancellationError(Exception):
+    """Raised when execution is cancelled by user."""
+    pass
+
+
+def check_cancellation(shared: Dict[str, Any]):
+    """Check if cancellation has been requested."""
+    stop_event = shared.get("stop_event")
+    if stop_event and stop_event.is_set():
+        raise CancellationError("Execution cancelled by user")
+
+
 # =============================================================================
 # Multi-Agent Nodes
 # =============================================================================
@@ -78,6 +91,7 @@ class CoordinatorNode(Node):
     
     def prep(self, shared: Dict[str, Any]) -> Dict[str, Any]:
         """Get the query and context."""
+        check_cancellation(shared)
         return {
             "query": shared.get("current_query", ""),
             "object_types": shared.get("object_types", []),
@@ -142,6 +156,7 @@ class PlannerNode(Node):
     
     def prep(self, shared: Dict[str, Any]) -> Dict[str, Any]:
         """Get query and available schemas."""
+        check_cancellation(shared)
         return {
             "query": shared.get("current_query", ""),
             "object_types": shared.get("object_types", []),
@@ -200,6 +215,7 @@ class ExecutorNode(Node):
     
     def prep(self, shared):
         """Get current step from plan."""
+        check_cancellation(shared)
         plan = shared.get("execution_plan", [])
         current_step = shared.get("current_step", 0)
         config = get_config(shared)
@@ -348,6 +364,7 @@ class SimpleExecutorNode(Node):
     
     def prep(self, shared: Dict[str, Any]) -> Dict[str, Any]:
         """Prepare for simple execution."""
+        check_cancellation(shared)
         # Get config from shared store
         config = shared.get("config")
         max_results = config.agent.max_query_results if config else 100
@@ -411,6 +428,7 @@ class MultiAgentAnswerNode(Node):
     
     def prep(self, shared: Dict[str, Any]) -> Dict[str, Any]:
         """Gather all accumulated data and context."""
+        check_cancellation(shared)
         return {
             "query": shared.get("current_query", ""),
             "fetched_data": shared.get("fetched_data"),

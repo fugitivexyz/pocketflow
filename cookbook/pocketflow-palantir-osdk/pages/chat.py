@@ -15,6 +15,7 @@ This is the main chat page of the multi-page app.
 import streamlit as st
 import pandas as pd
 import copy
+import threading
 
 # Import from parent directory
 import sys
@@ -160,6 +161,11 @@ with st.sidebar:
         if st.button("🛑 Stop Generation", use_container_width=True, type="primary", help="Cancel the current query"):
             st.session_state.stop_requested = True
             st.session_state.is_generating = False
+            
+            # Signal backend cancellation
+            if "current_stop_event" in st.session_state:
+                st.session_state.current_stop_event.set()
+            
             st.warning("⚠️ Generation stopped. The background process may take a moment to halt.")
             st.rerun()
     
@@ -214,6 +220,10 @@ def run_with_streaming_ui(query: str, conversation_history: list, status_contain
     # Reset stop flag at start
     st.session_state.stop_requested = False
     
+    # Create stop event for backend cancellation
+    stop_event = threading.Event()
+    st.session_state.current_stop_event = stop_event
+    
     # Create streaming callback
     callback = StreamingCallback()
     
@@ -226,7 +236,8 @@ def run_with_streaming_ui(query: str, conversation_history: list, status_contain
         callback,
         query,
         conversation_history,
-        config  # Pass config to flow
+        config,  # Pass config to flow
+        stop_event=stop_event  # Pass stop event
     )
     
     # Track displayed steps
@@ -265,10 +276,13 @@ def run_with_streaming_ui(query: str, conversation_history: list, status_contain
     
     # Wait for thread to complete with timeout from config
     timeout_seconds = config.agent.query_timeout
-    thread.join(timeout=timeout_seconds)
+    
+    # Only wait if not cancelled
+    if not st.session_state.stop_requested:
+        thread.join(timeout=timeout_seconds)
     
     # Check if thread is still running after timeout
-    if thread.is_alive():
+    if thread.is_alive() and not st.session_state.stop_requested:
         st.warning(f"⏱️ Query processing timed out after {timeout_seconds} seconds. The background process is still running.")
         return {
             "final_answer": "The query took too long to process. Please try a simpler question or try again later.",
@@ -395,6 +409,9 @@ def execute_pending_query():
         
         # Store message using shared function
         store_assistant_message(result, query)
+        
+        # Rerun to update UI state (remove Stop button)
+        st.rerun()
 
 
 # =============================================================================

@@ -33,6 +33,7 @@ This multi-agent approach is useful for:
 
 from pocketflow import Flow
 from typing import Dict, Any, List, Optional
+import threading
 from nodes import (
     CoordinatorNode,
     PlannerNode,
@@ -82,13 +83,18 @@ def create_multi_agent_flow(config: Optional[AppConfig] = None) -> Flow:
     return Flow(start=coordinator)
 
 
-def initialize_multi_agent_state(query: str, config: Optional[AppConfig] = None) -> Dict[str, Any]:
+def initialize_multi_agent_state(
+    query: str, 
+    config: Optional[AppConfig] = None,
+    stop_event: Optional[threading.Event] = None
+) -> Dict[str, Any]:
     """
     Initialize the shared state for multi-agent execution.
     
     Args:
         query: The user's question
         config: Optional AppConfig for settings
+        stop_event: Optional threading.Event to signal cancellation
         
     Returns:
         Initialized shared state dictionary
@@ -123,13 +129,15 @@ def initialize_multi_agent_state(query: str, config: Optional[AppConfig] = None)
         "thinking_steps": [],
         "action_history": [],  # Track actions for loop detection
         "config": config,  # Store config in shared state for nodes to access
+        "stop_event": stop_event,  # Cancellation token
     }
 
 
 def run_multi_agent_query(
     query: str, 
     conversation_history: Optional[List[Dict[str, str]]] = None,
-    config: Optional[AppConfig] = None
+    config: Optional[AppConfig] = None,
+    stop_event: Optional[threading.Event] = None
 ) -> Dict[str, Any]:
     """
     Run a query through the multi-agent flow.
@@ -138,11 +146,12 @@ def run_multi_agent_query(
         query: The user's question
         conversation_history: Optional list of previous messages
         config: Optional AppConfig for settings
+        stop_event: Optional threading.Event to signal cancellation
         
     Returns:
         Dictionary with results
     """
-    shared = initialize_multi_agent_state(query, config)
+    shared = initialize_multi_agent_state(query, config, stop_event)
     
     if conversation_history:
         shared["messages"] = conversation_history
