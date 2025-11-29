@@ -13,7 +13,7 @@ Examples:
 
 import sys
 import argparse
-from multi_agent_flow import run_multi_agent_query
+from flow import run_query as run_multi_agent_query
 
 
 def print_divider(char="=", width=70):

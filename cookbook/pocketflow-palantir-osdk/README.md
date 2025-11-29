@@ -106,18 +106,43 @@ pocketflow-palantir-osdk/
 ├── app.py                 # Streamlit chat UI
 ├── main.py                # CLI entry point
 ├── nodes.py               # PocketFlow node definitions
-├── multi_agent_flow.py    # Multi-agent flow
+├── flow.py                # Multi-agent flow (Coordinator-Planner-Executor)
+├── simple_flow.py         # Simple single-node flow (for comparison)
 ├── prompts.py             # LLM prompts
+├── data/
+│   └── mock_pharma.json   # Mock pharmaceutical R&D data
 ├── utils/
 │   ├── __init__.py
 │   ├── call_llm.py        # LLM wrapper (OpenAI-compatible)
-│   ├── osdk_client.py     # OSDK interface + mock data
+│   ├── config.py          # Simple env-based configuration
+│   ├── osdk_client.py     # OSDK interface + mock implementation
 │   ├── streaming.py       # Real-time streaming utilities
 │   └── visualization.py   # Plotly chart generation
 ├── docs/
 │   └── design.md          # Detailed architecture docs
+├── pages/
+│   └── chat.py            # Streamlit chat page
 ├── requirements.txt
 └── README.md
+```
+
+## When to Use Multi-Agent vs Simple Flow
+
+This cookbook includes two flow implementations:
+
+| Flow                               | Use When                                             | Example Queries                        |
+| ---------------------------------- | ---------------------------------------------------- | -------------------------------------- |
+| **`flow.py`** (Multi-Agent)        | Complex analysis, visualizations, multi-step queries | "Compare turbidity across surfactants" |
+| **`simple_flow.py`** (Single-Node) | Simple lookups, basic filtering                      | "Show all experiments"                 |
+
+```python
+# Multi-agent for complex queries
+from flow import run_query
+result = run_query("Compare turbidity across surfactants")
+
+# Simple flow for basic queries
+from simple_flow import run_simple_query
+result = run_simple_query("Show all experiments")
 ```
 
 ## Integrating with Real Palantir OSDK
@@ -230,10 +255,9 @@ Every LLM prompt and response is logged to `shared["thinking_steps"]`, displayed
 
 ### Adding New Object Types (Mock Data)
 
-1. Edit `utils/osdk_client.py`
-2. Add data generation in `_initialize_mock_data()`
-3. Add schema definition in `self._schemas`
-4. Add to `self._data` mapping
+1. Edit `data/mock_pharma.json` to add new data records
+2. Update the schemas section in the same JSON file
+3. The `MockOSDKClient` will automatically load the new data
 
 ### Adding New Actions
 
@@ -253,10 +277,12 @@ Every LLM prompt and response is logged to `shared["thinking_steps"]`, displayed
 | [`app.py`](./app.py)                                 | Streamlit chat interface with full transparency |
 | [`main.py`](./main.py)                               | CLI interface for testing                       |
 | [`nodes.py`](./nodes.py)                             | All PocketFlow node definitions                 |
-| [`multi_agent_flow.py`](./multi_agent_flow.py)       | Multi-agent coordinator-planner flow            |
+| [`flow.py`](./flow.py)                               | Multi-agent coordinator-planner flow            |
+| [`simple_flow.py`](./simple_flow.py)                 | Simple single-node flow for basic queries       |
 | [`utils/call_llm.py`](./utils/call_llm.py)           | OpenAI-compatible LLM wrapper                   |
 | [`utils/osdk_client.py`](./utils/osdk_client.py)     | OSDK interface + mock implementation            |
 | [`utils/visualization.py`](./utils/visualization.py) | Plotly chart generation                         |
+| [`data/mock_pharma.json`](./data/mock_pharma.json)   | Mock pharmaceutical R&D data                    |
 | [`docs/design.md`](./docs/design.md)                 | Detailed architecture documentation             |
 
 ## Related Cookbooks

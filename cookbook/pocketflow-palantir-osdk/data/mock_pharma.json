@@ -1,0 +1,587 @@
+{
+  "proteins": [
+    {
+      "protein_id": "PROT001",
+      "name": "Reslizumab",
+      "molecular_weight": 147000,
+      "type": "monoclonal_antibody"
+    },
+    {
+      "protein_id": "PROT002",
+      "name": "Adalimumab",
+      "molecular_weight": 148000,
+      "type": "monoclonal_antibody"
+    },
+    {
+      "protein_id": "PROT003",
+      "name": "Bevacizumab",
+      "molecular_weight": 149000,
+      "type": "monoclonal_antibody"
+    }
+  ],
+  "excipients": [
+    {
+      "excipient_id": "EXC001",
+      "name": "Polysorbate 80",
+      "category": "surfactant",
+      "supplier": "Sigma"
+    },
+    {
+      "excipient_id": "EXC002",
+      "name": "Polysorbate 20",
+      "category": "surfactant",
+      "supplier": "Sigma"
+    },
+    {
+      "excipient_id": "EXC003",
+      "name": "Poloxamer 188",
+      "category": "surfactant",
+      "supplier": "BASF"
+    },
+    {
+      "excipient_id": "EXC004",
+      "name": "Histidine",
+      "category": "buffer",
+      "supplier": "Ajinomoto"
+    },
+    {
+      "excipient_id": "EXC005",
+      "name": "Sucrose",
+      "category": "stabilizer",
+      "supplier": "Pfanstiehl"
+    },
+    {
+      "excipient_id": "EXC006",
+      "name": "Arginine",
+      "category": "stabilizer",
+      "supplier": "Ajinomoto"
+    },
+    {
+      "excipient_id": "EXC007",
+      "name": "Sodium Chloride",
+      "category": "tonicity_agent",
+      "supplier": "Sigma"
+    }
+  ],
+  "experiments": [
+    {
+      "experiment_id": "EXP001",
+      "name": "Surfactant Screening Study",
+      "protein_id": "PROT001",
+      "status": "completed",
+      "start_date": "2024-01-15",
+      "end_date": "2024-02-28",
+      "lead_scientist": "Dr. Smith"
+    },
+    {
+      "experiment_id": "EXP002",
+      "name": "pH Stability Study",
+      "protein_id": "PROT001",
+      "status": "completed",
+      "start_date": "2024-02-01",
+      "end_date": "2024-03-15",
+      "lead_scientist": "Dr. Johnson"
+    },
+    {
+      "experiment_id": "EXP003",
+      "name": "Viscosity Optimization",
+      "protein_id": "PROT002",
+      "status": "in_progress",
+      "start_date": "2024-03-01",
+      "end_date": null,
+      "lead_scientist": "Dr. Williams"
+    },
+    {
+      "experiment_id": "EXP004",
+      "name": "Thermal Stress Study",
+      "protein_id": "PROT001",
+      "status": "completed",
+      "start_date": "2024-01-20",
+      "end_date": "2024-03-01",
+      "lead_scientist": "Dr. Smith"
+    },
+    {
+      "experiment_id": "EXP005",
+      "name": "Freeze-Thaw Stability",
+      "protein_id": "PROT003",
+      "status": "planned",
+      "start_date": "2024-04-01",
+      "end_date": null,
+      "lead_scientist": "Dr. Brown"
+    }
+  ],
+  "samples": [
+    {
+      "sample_id": "SAM0001",
+      "experiment_id": "EXP001",
+      "surfactant": "Polysorbate 80",
+      "surfactant_concentration": 0.01,
+      "donor_type": "male",
+      "stress_condition": "none",
+      "protein_concentration": 50.0,
+      "ph": 6.2,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0002",
+      "experiment_id": "EXP001",
+      "surfactant": "Polysorbate 80",
+      "surfactant_concentration": 0.01,
+      "donor_type": "female",
+      "stress_condition": "pH11",
+      "protein_concentration": 50.0,
+      "ph": 6.8,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0003",
+      "experiment_id": "EXP001",
+      "surfactant": "Polysorbate 80",
+      "surfactant_concentration": 0.02,
+      "donor_type": "male",
+      "stress_condition": "shaker",
+      "protein_concentration": 50.0,
+      "ph": 7.1,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0004",
+      "experiment_id": "EXP001",
+      "surfactant": "Polysorbate 80",
+      "surfactant_concentration": 0.02,
+      "donor_type": "female",
+      "stress_condition": "thermal_40C",
+      "protein_concentration": 50.0,
+      "ph": 5.9,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0005",
+      "experiment_id": "EXP001",
+      "surfactant": "Polysorbate 80",
+      "surfactant_concentration": 0.05,
+      "donor_type": "male",
+      "stress_condition": "freeze_thaw",
+      "protein_concentration": 50.0,
+      "ph": 6.5,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0006",
+      "experiment_id": "EXP001",
+      "surfactant": "Polysorbate 80",
+      "surfactant_concentration": 0.05,
+      "donor_type": "female",
+      "stress_condition": "none",
+      "protein_concentration": 50.0,
+      "ph": 7.0,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0007",
+      "experiment_id": "EXP001",
+      "surfactant": "Polysorbate 20",
+      "surfactant_concentration": 0.01,
+      "donor_type": "male",
+      "stress_condition": "pH11",
+      "protein_concentration": 50.0,
+      "ph": 6.3,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0008",
+      "experiment_id": "EXP001",
+      "surfactant": "Polysorbate 20",
+      "surfactant_concentration": 0.01,
+      "donor_type": "female",
+      "stress_condition": "shaker",
+      "protein_concentration": 50.0,
+      "ph": 6.9,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0009",
+      "experiment_id": "EXP001",
+      "surfactant": "Polysorbate 20",
+      "surfactant_concentration": 0.02,
+      "donor_type": "male",
+      "stress_condition": "thermal_40C",
+      "protein_concentration": 50.0,
+      "ph": 5.8,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0010",
+      "experiment_id": "EXP001",
+      "surfactant": "Polysorbate 20",
+      "surfactant_concentration": 0.02,
+      "donor_type": "female",
+      "stress_condition": "freeze_thaw",
+      "protein_concentration": 50.0,
+      "ph": 6.4,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0011",
+      "experiment_id": "EXP001",
+      "surfactant": "Polysorbate 20",
+      "surfactant_concentration": 0.05,
+      "donor_type": "male",
+      "stress_condition": "none",
+      "protein_concentration": 50.0,
+      "ph": 7.2,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0012",
+      "experiment_id": "EXP001",
+      "surfactant": "Polysorbate 20",
+      "surfactant_concentration": 0.05,
+      "donor_type": "female",
+      "stress_condition": "pH11",
+      "protein_concentration": 50.0,
+      "ph": 6.6,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0013",
+      "experiment_id": "EXP001",
+      "surfactant": "Poloxamer 188",
+      "surfactant_concentration": 0.01,
+      "donor_type": "male",
+      "stress_condition": "shaker",
+      "protein_concentration": 50.0,
+      "ph": 5.7,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0014",
+      "experiment_id": "EXP001",
+      "surfactant": "Poloxamer 188",
+      "surfactant_concentration": 0.01,
+      "donor_type": "female",
+      "stress_condition": "thermal_40C",
+      "protein_concentration": 50.0,
+      "ph": 6.1,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0015",
+      "experiment_id": "EXP001",
+      "surfactant": "Poloxamer 188",
+      "surfactant_concentration": 0.02,
+      "donor_type": "male",
+      "stress_condition": "freeze_thaw",
+      "protein_concentration": 50.0,
+      "ph": 7.3,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0016",
+      "experiment_id": "EXP001",
+      "surfactant": "Poloxamer 188",
+      "surfactant_concentration": 0.02,
+      "donor_type": "female",
+      "stress_condition": "none",
+      "protein_concentration": 50.0,
+      "ph": 6.7,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0017",
+      "experiment_id": "EXP001",
+      "surfactant": "Poloxamer 188",
+      "surfactant_concentration": 0.05,
+      "donor_type": "male",
+      "stress_condition": "pH11",
+      "protein_concentration": 50.0,
+      "ph": 5.6,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0018",
+      "experiment_id": "EXP001",
+      "surfactant": "Poloxamer 188",
+      "surfactant_concentration": 0.05,
+      "donor_type": "female",
+      "stress_condition": "shaker",
+      "protein_concentration": 50.0,
+      "ph": 6.0,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0019",
+      "experiment_id": "EXP002",
+      "surfactant": "Polysorbate 80",
+      "surfactant_concentration": 0.01,
+      "donor_type": "male",
+      "stress_condition": "thermal_40C",
+      "protein_concentration": 50.0,
+      "ph": 7.4,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0020",
+      "experiment_id": "EXP002",
+      "surfactant": "Polysorbate 80",
+      "surfactant_concentration": 0.01,
+      "donor_type": "female",
+      "stress_condition": "freeze_thaw",
+      "protein_concentration": 50.0,
+      "ph": 6.2,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0021",
+      "experiment_id": "EXP002",
+      "surfactant": "Polysorbate 80",
+      "surfactant_concentration": 0.02,
+      "donor_type": "male",
+      "stress_condition": "none",
+      "protein_concentration": 50.0,
+      "ph": 5.5,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0022",
+      "experiment_id": "EXP002",
+      "surfactant": "Polysorbate 80",
+      "surfactant_concentration": 0.02,
+      "donor_type": "female",
+      "stress_condition": "pH11",
+      "protein_concentration": 50.0,
+      "ph": 6.8,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0023",
+      "experiment_id": "EXP002",
+      "surfactant": "Polysorbate 80",
+      "surfactant_concentration": 0.05,
+      "donor_type": "male",
+      "stress_condition": "shaker",
+      "protein_concentration": 50.0,
+      "ph": 7.0,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0024",
+      "experiment_id": "EXP002",
+      "surfactant": "Polysorbate 80",
+      "surfactant_concentration": 0.05,
+      "donor_type": "female",
+      "stress_condition": "thermal_40C",
+      "protein_concentration": 50.0,
+      "ph": 6.3,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0025",
+      "experiment_id": "EXP002",
+      "surfactant": "Polysorbate 20",
+      "surfactant_concentration": 0.01,
+      "donor_type": "male",
+      "stress_condition": "freeze_thaw",
+      "protein_concentration": 50.0,
+      "ph": 5.9,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0026",
+      "experiment_id": "EXP002",
+      "surfactant": "Polysorbate 20",
+      "surfactant_concentration": 0.01,
+      "donor_type": "female",
+      "stress_condition": "none",
+      "protein_concentration": 50.0,
+      "ph": 7.1,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0027",
+      "experiment_id": "EXP002",
+      "surfactant": "Polysorbate 20",
+      "surfactant_concentration": 0.02,
+      "donor_type": "male",
+      "stress_condition": "pH11",
+      "protein_concentration": 50.0,
+      "ph": 6.5,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0028",
+      "experiment_id": "EXP002",
+      "surfactant": "Polysorbate 20",
+      "surfactant_concentration": 0.02,
+      "donor_type": "female",
+      "stress_condition": "shaker",
+      "protein_concentration": 50.0,
+      "ph": 5.7,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0029",
+      "experiment_id": "EXP002",
+      "surfactant": "Polysorbate 20",
+      "surfactant_concentration": 0.05,
+      "donor_type": "male",
+      "stress_condition": "thermal_40C",
+      "protein_concentration": 50.0,
+      "ph": 6.9,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0030",
+      "experiment_id": "EXP002",
+      "surfactant": "Polysorbate 20",
+      "surfactant_concentration": 0.05,
+      "donor_type": "female",
+      "stress_condition": "freeze_thaw",
+      "protein_concentration": 50.0,
+      "ph": 7.2,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0031",
+      "experiment_id": "EXP002",
+      "surfactant": "Poloxamer 188",
+      "surfactant_concentration": 0.01,
+      "donor_type": "male",
+      "stress_condition": "none",
+      "protein_concentration": 50.0,
+      "ph": 6.4,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0032",
+      "experiment_id": "EXP002",
+      "surfactant": "Poloxamer 188",
+      "surfactant_concentration": 0.01,
+      "donor_type": "female",
+      "stress_condition": "pH11",
+      "protein_concentration": 50.0,
+      "ph": 5.8,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0033",
+      "experiment_id": "EXP002",
+      "surfactant": "Poloxamer 188",
+      "surfactant_concentration": 0.02,
+      "donor_type": "male",
+      "stress_condition": "shaker",
+      "protein_concentration": 50.0,
+      "ph": 7.3,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0034",
+      "experiment_id": "EXP002",
+      "surfactant": "Poloxamer 188",
+      "surfactant_concentration": 0.02,
+      "donor_type": "female",
+      "stress_condition": "thermal_40C",
+      "protein_concentration": 50.0,
+      "ph": 6.1,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0035",
+      "experiment_id": "EXP002",
+      "surfactant": "Poloxamer 188",
+      "surfactant_concentration": 0.05,
+      "donor_type": "male",
+      "stress_condition": "freeze_thaw",
+      "protein_concentration": 50.0,
+      "ph": 5.6,
+      "created_date": "2024-02-01"
+    },
+    {
+      "sample_id": "SAM0036",
+      "experiment_id": "EXP002",
+      "surfactant": "Poloxamer 188",
+      "surfactant_concentration": 0.05,
+      "donor_type": "female",
+      "stress_condition": "none",
+      "protein_concentration": 50.0,
+      "ph": 6.7,
+      "created_date": "2024-02-01"
+    }
+  ],
+  "schemas": {
+    "Protein": {
+      "description": "Proteins being studied in R&D experiments",
+      "properties": {
+        "protein_id": "string (primary key)",
+        "name": "string",
+        "molecular_weight": "number (Daltons)",
+        "type": "string (monoclonal_antibody, enzyme, etc.)"
+      },
+      "primary_key": "protein_id"
+    },
+    "Excipient": {
+      "description": "Excipients used in pharmaceutical formulations",
+      "properties": {
+        "excipient_id": "string (primary key)",
+        "name": "string",
+        "category": "string (surfactant, buffer, stabilizer, tonicity_agent)",
+        "supplier": "string"
+      },
+      "primary_key": "excipient_id"
+    },
+    "Experiment": {
+      "description": "Research experiments studying protein stability and formulation",
+      "properties": {
+        "experiment_id": "string (primary key)",
+        "name": "string",
+        "protein_id": "string (foreign key to Protein)",
+        "status": "string (planned, in_progress, completed)",
+        "start_date": "date",
+        "end_date": "date (nullable)",
+        "lead_scientist": "string"
+      },
+      "primary_key": "experiment_id",
+      "links": ["Protein", "Sample"]
+    },
+    "Sample": {
+      "description": "Samples with specific formulations tested in experiments",
+      "properties": {
+        "sample_id": "string (primary key)",
+        "experiment_id": "string (foreign key to Experiment)",
+        "surfactant": "string",
+        "surfactant_concentration": "number (%)",
+        "donor_type": "string (male, female)",
+        "stress_condition": "string (none, pH11, shaker, thermal_40C, freeze_thaw)",
+        "protein_concentration": "number (mg/mL)",
+        "ph": "number",
+        "created_date": "date"
+      },
+      "primary_key": "sample_id",
+      "links": ["Experiment", "Result"]
+    },
+    "Result": {
+      "description": "Measurement results from analytical tests",
+      "properties": {
+        "result_id": "string (primary key)",
+        "sample_id": "string (foreign key to Sample)",
+        "experiment_id": "string (foreign key to Experiment)",
+        "measurement_type": "string (SEC_monomer, SEC_aggregate, turbidity, viscosity, sub_visible_particles)",
+        "time_point": "string (D0, D7, D14, D28)",
+        "value": "number",
+        "unit": "string",
+        "measurement_date": "date",
+        "analyst": "string"
+      },
+      "primary_key": "result_id",
+      "links": ["Sample", "Experiment"]
+    }
+  },
+  "links": {
+    "Experiment->Sample": ["experiment_id", "experiment_id"],
+    "Experiment->Protein": ["protein_id", "protein_id"],
+    "Sample->Result": ["sample_id", "sample_id"],
+    "Sample->Experiment": ["experiment_id", "experiment_id"],
+    "Result->Sample": ["sample_id", "sample_id"],
+    "Result->Experiment": ["experiment_id", "experiment_id"]
+  }
+}

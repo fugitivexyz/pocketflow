@@ -22,10 +22,10 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from multi_agent_flow import run_multi_agent_query
+from flow import run_query as run_multi_agent_query
 from utils.osdk_client import get_osdk_client
 from utils.streaming import StreamingCallback, run_flow_with_streaming
-from utils.config import load_config, AppConfig
+from utils.config import load_config, Config
 
 
 # =============================================================================
@@ -95,7 +95,7 @@ init_session_state()
 # Config-aware helpers
 # =============================================================================
 
-def get_config() -> AppConfig:
+def get_config() -> Config:
     """Get current config from session state."""
     return st.session_state.config
 
