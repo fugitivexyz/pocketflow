@@ -14,6 +14,10 @@ A PocketFlow cookbook example demonstrating how to build an agentic chatbot that
 - 🤖 **Multi-Agent Architecture**: Coordinator-Planner-Executor pattern for robust query handling
 - 💬 **Conversation Memory**: Context is maintained across queries
 - 🧪 **Mock Data Included**: Works out-of-the-box with pharmaceutical R&D sample data
+- 🔍 **Rich Filters**: Support for comparison, list membership, and text search operators
+- 📄 **Pagination**: Handle large datasets with automatic or manual pagination
+- 📈 **Aggregations**: Server-side grouping and statistical calculations
+- 🔗 **Link Discovery**: Dynamically discover relationships between object types
 
 ## Architecture
 
@@ -76,6 +80,101 @@ Try these with the mock data:
 | "Show results for experiment EXP001"                 | Query linked objects           |
 | "Compare turbidity across surfactants"               | Analysis + visualization       |
 | "Create a chart of SEC monomer values by time point" | Direct visualization request   |
+| "What's the average turbidity by surfactant?"        | Aggregation query              |
+| "Show samples with pH between 6.0 and 7.0"           | Rich filter with range         |
+| "What links exist from Sample?"                      | Link discovery                 |
+
+## OSDK Client Capabilities
+
+### Rich Filter Operators
+
+The cookbook supports advanced filtering beyond simple equality:
+
+| Operator      | Description           | Example                                     |
+| ------------- | --------------------- | ------------------------------------------- |
+| `$eq`         | Equal to              | `{"status": {"$eq": "completed"}}`          |
+| `$ne`         | Not equal             | `{"status": {"$ne": "cancelled"}}`          |
+| `$gt`         | Greater than          | `{"value": {"$gt": 50}}`                    |
+| `$gte`        | Greater than or equal | `{"ph": {"$gte": 6.0}}`                     |
+| `$lt`         | Less than             | `{"value": {"$lt": 100}}`                   |
+| `$lte`        | Less than or equal    | `{"ph": {"$lte": 7.5}}`                     |
+| `$in`         | In list               | `{"surfactant": {"$in": ["PS80", "PS20"]}}` |
+| `$nin`        | Not in list           | `{"status": {"$nin": ["failed"]}}`          |
+| `$contains`   | Text contains         | `{"name": {"$contains": "stability"}}`      |
+| `$startswith` | Text starts with      | `{"sample_id": {"$startswith": "SAM00"}}`   |
+
+Combine operators: `{"value": {"$gt": 10, "$lt": 50}}`
+
+### Pagination
+
+For large datasets, use paginated queries:
+
+```python
+result = client.query_objects_paginated(
+    "Result",
+    filters={"measurement_type": "turbidity"},
+    limit=100,
+    offset=0,
+    order_by="value",
+    order_direction="desc"
+)
+# Returns: {"data": DataFrame, "total_count": int, "has_more": bool, ...}
+```
+
+Auto-pagination can be enabled via config:
+
+```bash
+export AUTO_PAGINATE=true
+export MAX_AUTO_PAGINATE_PAGES=10
+```
+
+### Aggregations
+
+Compute statistics grouped by columns:
+
+```python
+result = client.aggregate_objects(
+    "Result",
+    group_by=["measurement_type"],
+    aggregations={"value": "mean", "result_id": "count"},
+    filters={}
+)
+```
+
+Supported operations: `mean`, `sum`, `count`, `min`, `max`, `median`, `std`
+
+### Link Discovery
+
+Discover relationships between object types:
+
+```python
+links = client.list_link_types("Sample")
+# Returns: [{"link_name": "Result", "source_field": "sample_id", ...}, ...]
+```
+
+### Data Merging
+
+Combine data from multiple queries in multi-step plans:
+
+```yaml
+plan:
+  - step: 1
+    action: fetch
+    object_type: Sample
+    description: Fetch samples with surfactant info
+  - step: 2
+    action: fetch
+    object_type: Result
+    filters: { measurement_type: turbidity }
+    description: Fetch turbidity results
+  - step: 3
+    action: merge
+    left: 0 # Reference to step 1 (step_0)
+    right: 1 # Reference to step 2 (step_1)
+    on: sample_id # Common column to join on
+    how: inner # Join type: inner, left, right, outer
+    description: Join samples with results
+```
 
 ## Mock Data Structure
 
@@ -204,12 +303,16 @@ export PALANTIR_TOKEN="..."
 
 ### Environment Variables
 
-| Variable          | Default        | Description                           |
-| ----------------- | -------------- | ------------------------------------- |
-| `OPENAI_API_KEY`  | Required       | Your OpenAI API key                   |
-| `OPENAI_BASE_URL` | OpenAI default | Custom endpoint (Azure, local models) |
-| `OPENAI_MODEL`    | `gpt-4o`       | Model to use                          |
-| `USE_MOCK_OSDK`   | `true`         | Use mock data vs real OSDK            |
+| Variable                  | Default        | Description                                  |
+| ------------------------- | -------------- | -------------------------------------------- |
+| `OPENAI_API_KEY`          | Required       | Your OpenAI API key                          |
+| `OPENAI_BASE_URL`         | OpenAI default | Custom endpoint (Azure, local models)        |
+| `OPENAI_MODEL`            | `gpt-4o`       | Model to use                                 |
+| `USE_MOCK_OSDK`           | `true`         | Use mock data vs real OSDK                   |
+| `AUTO_PAGINATE`           | `false`        | Automatically fetch all pages for large data |
+| `MAX_AUTO_PAGINATE_PAGES` | `10`           | Safety limit for auto-pagination             |
+| `MAX_QUERY_RESULTS`       | `100`          | Default limit for query results              |
+| `MAX_PLAN_STEPS`          | `5`            | Maximum steps in a complex query plan        |
 
 ### Using Azure OpenAI
 

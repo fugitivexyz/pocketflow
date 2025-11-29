@@ -166,6 +166,7 @@ class ExecutorNode(Node):
             "accumulated_data": shared.get("accumulated_data", {}),
             "fetched_data": shared.get("fetched_data"),
             "user_query": shared.get("current_query", ""),
+            "config": shared.get("config"),
         }
 
     def exec(self, prep_res: Optional[Dict[str, Any]]) -> Dict[str, Any]:
@@ -178,13 +179,136 @@ class ExecutorNode(Node):
         result = {"action": action, "step": step}
 
         if action == "fetch":
-            df = client.query_objects(
+            # Check if pagination is requested
+            use_pagination = step.get("paginate", False)
+            
+            if use_pagination:
+                # Use paginated query
+                page_result = client.query_objects_paginated(
+                    object_type=step.get("object_type", ""),
+                    filters=step.get("filters", {}),
+                    limit=step.get("limit", 100),
+                    offset=step.get("offset", 0),
+                    order_by=step.get("order_by"),
+                    order_direction=step.get("order_direction", "asc"),
+                )
+                result["data"] = page_result["data"]
+                result["pagination"] = {
+                    "total_count": page_result["total_count"],
+                    "has_more": page_result["has_more"],
+                    "offset": page_result["offset"],
+                    "limit": page_result["limit"],
+                }
+                
+                # Auto-paginate if enabled and there's more data
+                config = prep_res.get("config")
+                if config and getattr(config, "auto_paginate", False) and page_result["has_more"]:
+                    all_data = [page_result["data"]]
+                    current_offset = page_result["offset"] + page_result["limit"]
+                    max_pages = getattr(config, "max_auto_paginate_pages", 10)
+                    pages_fetched = 1
+                    
+                    while page_result["has_more"] and pages_fetched < max_pages:
+                        page_result = client.query_objects_paginated(
+                            object_type=step.get("object_type", ""),
+                            filters=step.get("filters", {}),
+                            limit=step.get("limit", 100),
+                            offset=current_offset,
+                            order_by=step.get("order_by"),
+                            order_direction=step.get("order_direction", "asc"),
+                        )
+                        all_data.append(page_result["data"])
+                        current_offset += page_result["limit"]
+                        pages_fetched += 1
+                    
+                    result["data"] = pd.concat(all_data, ignore_index=True)
+                    result["pagination"]["pages_fetched"] = pages_fetched
+                    result["pagination"]["auto_paginated"] = True
+            else:
+                # Use simple query (backward compatible)
+                df = client.query_objects(
+                    object_type=step.get("object_type", ""),
+                    filters=step.get("filters", {}),
+                    limit=step.get("limit", 100),
+                )
+                result["data"] = df
+            
+            result["success"] = True
+
+        elif action == "aggregate":
+            # Handle aggregation action
+            df = client.aggregate_objects(
                 object_type=step.get("object_type", ""),
+                group_by=step.get("group_by", []),
+                aggregations=step.get("aggregations", {}),
                 filters=step.get("filters", {}),
-                limit=step.get("limit", 100),
             )
             result["data"] = df
             result["success"] = True
+
+        elif action == "discover_links":
+            # Handle link discovery action
+            links = client.list_link_types(step.get("object_type", ""))
+            result["links"] = links
+            result["success"] = True
+
+        elif action == "merge":
+            # Handle merge/join action for combining data from multiple fetches
+            acc_data = prep_res.get("accumulated_data", {})
+            left_key = step.get("left", "")  # e.g., "step_0"
+            right_key = step.get("right", "")  # e.g., "step_1"
+            on_column = step.get("on", "")  # column to join on
+            how = step.get("how", "inner")  # join type: inner, left, right, outer
+            
+            # Support referencing by step number or key
+            left_df = None
+            right_df = None
+            
+            for key, df in acc_data.items():
+                if key == left_key or key == f"step_{left_key}" or f"step_{key}" == left_key:
+                    left_df = df
+                if key == right_key or key == f"step_{right_key}" or f"step_{key}" == right_key:
+                    right_df = df
+            
+            # Also try numeric step references
+            if left_df is None and str(left_key).isdigit():
+                left_df = acc_data.get(f"step_{left_key}")
+            if right_df is None and str(right_key).isdigit():
+                right_df = acc_data.get(f"step_{right_key}")
+            
+            if left_df is not None and right_df is not None:
+                try:
+                    # Handle case where on_column might have different names
+                    left_on = step.get("left_on", on_column)
+                    right_on = step.get("right_on", on_column)
+                    
+                    if left_on and right_on:
+                        merged = pd.merge(left_df, right_df, left_on=left_on, right_on=right_on, how=how)
+                    elif on_column:
+                        merged = pd.merge(left_df, right_df, on=on_column, how=how)
+                    else:
+                        # Try to find common columns
+                        common_cols = list(set(left_df.columns) & set(right_df.columns))
+                        if common_cols:
+                            merged = pd.merge(left_df, right_df, on=common_cols[0], how=how)
+                        else:
+                            result["error"] = "No common column found for merge"
+                            result["success"] = False
+                            return result
+                    
+                    result["data"] = merged
+                    result["success"] = True
+                except Exception as e:
+                    result["error"] = f"Merge failed: {str(e)}"
+                    result["success"] = False
+            else:
+                missing = []
+                if left_df is None:
+                    missing.append(f"left ({left_key})")
+                if right_df is None:
+                    missing.append(f"right ({right_key})")
+                result["error"] = f"Missing data for merge: {', '.join(missing)}. Available: {list(acc_data.keys())}"
+                result["success"] = False
 
         elif action == "visualize":
             chart_spec = step.get("chart_spec", {})
@@ -234,6 +358,36 @@ class ExecutorNode(Node):
                 shared["accumulated_data"] = {}
             shared["accumulated_data"][f"step_{prep_res['step_num']}"] = exec_res["data"]
             shared["fetched_data"] = exec_res["data"]
+            # Log pagination info if available
+            if exec_res.get("pagination"):
+                pag = exec_res["pagination"]
+                pag_info = f"Retrieved {len(exec_res['data'])} of {pag['total_count']} total records"
+                if pag.get("auto_paginated"):
+                    pag_info += f" (auto-paginated {pag['pages_fetched']} pages)"
+                log_thinking(shared, "📄 Pagination", pag_info, level="medium")
+
+        if exec_res["action"] == "aggregate" and "data" in exec_res:
+            if "accumulated_data" not in shared:
+                shared["accumulated_data"] = {}
+            shared["accumulated_data"][f"step_{prep_res['step_num']}"] = exec_res["data"]
+            shared["fetched_data"] = exec_res["data"]
+            log_thinking(shared, "📊 Aggregation", f"Computed {len(exec_res['data'])} grouped results", level="medium")
+
+        if exec_res["action"] == "discover_links" and "links" in exec_res:
+            links = exec_res["links"]
+            shared["discovered_links"] = links
+            link_names = [l["link_name"] for l in links]
+            log_thinking(shared, "🔗 Links Discovered", f"Found links to: {', '.join(link_names) if link_names else 'none'}", level="medium")
+
+        if exec_res["action"] == "merge":
+            if exec_res.get("success") and "data" in exec_res:
+                if "accumulated_data" not in shared:
+                    shared["accumulated_data"] = {}
+                shared["accumulated_data"][f"step_{prep_res['step_num']}"] = exec_res["data"]
+                shared["fetched_data"] = exec_res["data"]
+                log_thinking(shared, "🔀 Data Merged", f"Combined into {len(exec_res['data'])} rows", level="medium")
+            elif exec_res.get("error"):
+                log_thinking(shared, "⚠️ Merge Error", exec_res["error"], level="low")
 
         if exec_res["action"] == "visualize":
             if exec_res.get("figure"):

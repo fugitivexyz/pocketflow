@@ -80,12 +80,29 @@ flowchart TB
 
 ### OSDK Client Methods
 
-| Method                               | Input               | Output      | Necessity                   |
-| ------------------------------------ | ------------------- | ----------- | --------------------------- |
-| `list_object_types()`                | None                | `List[str]` | Discover available data     |
-| `get_object_schema(type)`            | `str`               | `dict`      | Understand object structure |
-| `query_objects(type, filters)`       | `str`, `dict`       | `DataFrame` | Fetch data                  |
-| `get_linked_objects(type, pk, link)` | `str`, `str`, `str` | `DataFrame` | Traverse relationships      |
+| Method                                    | Input                            | Output       | Necessity                      |
+| ----------------------------------------- | -------------------------------- | ------------ | ------------------------------ |
+| `list_object_types()`                     | None                             | `List[str]`  | Discover available data        |
+| `get_object_schema(type)`                 | `str`                            | `dict`       | Understand object structure    |
+| `query_objects(type, filters, limit)`     | `str`, `dict`, `int`             | `DataFrame`  | Fetch data (with rich filters) |
+| `query_objects_paginated(...)`            | `str`, `dict`, pagination params | `dict`       | Paginated fetch with ordering  |
+| `get_linked_objects(type, pk, link)`      | `str`, `str`, `str`              | `DataFrame`  | Traverse relationships         |
+| `aggregate_objects(type, group_by, aggs)` | `str`, `List`, `dict`            | `DataFrame`  | Server-side aggregations       |
+| `list_link_types(type)`                   | `str`                            | `List[dict]` | Discover available links       |
+
+### Rich Filter Operators
+
+The OSDK client supports advanced filtering:
+
+| Operator      | Description          | Example                                     |
+| ------------- | -------------------- | ------------------------------------------- |
+| `$eq`         | Equal to             | `{"status": {"$eq": "completed"}}`          |
+| `$ne`         | Not equal            | `{"status": {"$ne": "cancelled"}}`          |
+| `$gt/$gte`    | Greater than (or eq) | `{"value": {"$gt": 50}}`                    |
+| `$lt/$lte`    | Less than (or eq)    | `{"ph": {"$lt": 7.5}}`                      |
+| `$in/$nin`    | In / not in list     | `{"surfactant": {"$in": ["PS80", "PS20"]}}` |
+| `$contains`   | Text contains        | `{"name": {"$contains": "stability"}}`      |
+| `$startswith` | Text starts with     | `{"id": {"$startswith": "SAM00"}}`          |
 
 ### `generate_chart` (utils/visualization.py)
 
@@ -172,8 +189,12 @@ parameters:
   object_type: Experiment
   filters:
     status: completed
-reason: Need to fetch completed experiments
+    budget: { "$gte": 50000 }
+  limit: 100
+reason: Need to fetch completed experiments with budget >= 50k
 ```
+
+Supported filter operators: `$eq`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`, `$in`, `$nin`, `$contains`, `$startswith`
 
 ## 7. Integration Guide
 
@@ -216,9 +237,14 @@ The system automatically discovers object types from the OSDK client. For mock d
 
 ## 8. Future Enhancements
 
+- [x] Rich filter operators ($gt, $lt, $in, $contains, etc.)
+- [x] Pagination support with auto-pagination option
+- [x] Server-side aggregations (sum, mean, count, min, max, median)
+- [x] Link discovery for relationship traversal
 - [ ] Streaming responses for long-running queries
 - [ ] Caching layer for repeated queries
 - [ ] Export results to CSV/Excel
 - [ ] Save/load conversation sessions
 - [ ] Support for OSDK Actions (write operations)
 - [ ] Vector search for semantic query matching
+- [ ] Attachment handling for file-linked objects

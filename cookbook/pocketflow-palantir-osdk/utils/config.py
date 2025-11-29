@@ -29,6 +29,8 @@ class AgentBehavior:
     max_retries: int = 2
     retry_delay: float = 1.0
     query_timeout: int = 120
+    auto_paginate: bool = False  # Automatically fetch all pages when querying
+    max_auto_paginate_pages: int = 10  # Safety limit for auto-pagination
 
 
 @dataclass
@@ -64,6 +66,10 @@ class Config:
     def max_query_results(self): return self.agent.max_query_results
     @property
     def verbosity_level(self): return self.transparency.verbosity_level
+    @property
+    def auto_paginate(self): return self.agent.auto_paginate
+    @property
+    def max_auto_paginate_pages(self): return self.agent.max_auto_paginate_pages
 
 
 def load_config() -> Config:
@@ -80,6 +86,8 @@ def load_config() -> Config:
             max_plan_steps=int(os.environ.get("MAX_PLAN_STEPS", "5")),
             max_query_results=int(os.environ.get("MAX_QUERY_RESULTS", "100")),
             query_timeout=int(os.environ.get("QUERY_TIMEOUT", "120")),
+            auto_paginate=os.environ.get("AUTO_PAGINATE", "false").lower() == "true",
+            max_auto_paginate_pages=int(os.environ.get("MAX_AUTO_PAGINATE_PAGES", "10")),
         ),
         transparency=Transparency(
             verbosity_level=os.environ.get("VERBOSITY_LEVEL", "medium"),
