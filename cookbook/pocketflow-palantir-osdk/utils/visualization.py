@@ -161,6 +161,7 @@ def validate_chart_spec(chart_spec: Dict[str, Any], df: pd.DataFrame) -> Dict[st
 def generate_chart(
     data: pd.DataFrame,
     chart_spec: Dict[str, Any],
+    template: str = "plotly_white",
 ) -> go.Figure:
     """
     Generate a Plotly chart from data and a specification.
@@ -178,6 +179,7 @@ def generate_chart(
             - facet_col: (Optional) Column for faceting into subplots
             - facet_row: (Optional) Row faceting
             - aggregation: (Optional) "mean", "sum", "count", "median"
+        template: Plotly template name for chart styling (default: "plotly_white")
             
     Returns:
         Plotly Figure object
@@ -301,7 +303,7 @@ def generate_chart(
             xaxis_title=x_label,
             yaxis_title=y_label,
             legend_title=color if color else None,
-            template="plotly_white",
+            template=template,
         )
     
     return fig

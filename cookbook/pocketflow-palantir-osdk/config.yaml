@@ -1,0 +1,21 @@
+model:
+  model: gpt-4o
+  temperature: 0.1
+
+agent:
+  complexity_mode: auto
+  max_plan_steps: 5
+  max_query_results: 100
+  max_retries: 2
+  retry_delay: 1.0
+  query_timeout: 120
+
+visualization:
+  auto_generate_charts: true
+
+transparency:
+  show_thinking_steps: true
+  verbosity_level: medium
+
+connection:
+  use_mock_data: true

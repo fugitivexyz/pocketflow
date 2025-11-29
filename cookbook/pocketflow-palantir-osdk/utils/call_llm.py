@@ -11,19 +11,38 @@ Environment Variables:
 - OPENAI_API_KEY: Your API key
 - OPENAI_BASE_URL: (Optional) Custom base URL for compatible providers
 - OPENAI_MODEL: (Optional) Model name, defaults to "gpt-4o"
+
+Config Override:
+- When an AppConfig is passed, its settings take precedence over env vars
 """
 
 import os
 import re
 import yaml
 from openai import OpenAI
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from utils.config import AppConfig
 
 
-def get_client():
-    """Get OpenAI client configured from environment variables."""
+def get_client(config: Optional["AppConfig"] = None):
+    """
+    Get OpenAI client configured from config or environment variables.
+    
+    Args:
+        config: Optional AppConfig for settings override
+    """
+    # Determine base URL
+    base_url = None
+    if config and config.connection.api_base_url:
+        base_url = config.connection.api_base_url
+    else:
+        base_url = os.environ.get("OPENAI_BASE_URL")
+    
     return OpenAI(
         api_key=os.environ.get("OPENAI_API_KEY", "your-api-key"),
-        base_url=os.environ.get("OPENAI_BASE_URL"),  # None = use default OpenAI
+        base_url=base_url,
     )
 
 
@@ -33,6 +52,11 @@ def call_llm(
     history: list = None,
     model: str = None,
     temperature: float = None,
+    config: Optional["AppConfig"] = None,
+    max_tokens: int = None,
+    top_p: float = None,
+    frequency_penalty: float = None,
+    presence_penalty: float = None,
 ) -> str:
     """
     Call the LLM with a prompt and optional conversation history.
@@ -41,16 +65,34 @@ def call_llm(
         prompt: The user's current message/prompt
         system_prompt: Optional system message to set context
         history: Optional list of previous messages [{"role": "user/assistant", "content": "..."}]
-        model: Optional model override (defaults to OPENAI_MODEL env var or "gpt-4o")
-        temperature: Optional temperature override (defaults to OPENAI_TEMPERATURE env var or 0.1)
-                     Low temperature (0.1) helps prevent infinite loops while allowing some variation
+        model: Optional model override (defaults to config or OPENAI_MODEL env var or "gpt-4o")
+        temperature: Optional temperature override (defaults to config or OPENAI_TEMPERATURE env var or 0.1)
+        config: Optional AppConfig for settings (takes precedence over env vars)
+        max_tokens: Optional max tokens override
+        top_p: Optional top_p override
+        frequency_penalty: Optional frequency penalty override
+        presence_penalty: Optional presence penalty override
 
     Returns:
         The LLM's response as a string
     """
-    client = get_client()
-    model = model or os.environ.get("OPENAI_MODEL", "gpt-4o")
-    temperature = temperature if temperature is not None else float(os.environ.get("OPENAI_TEMPERATURE", "0.1"))
+    client = get_client(config)
+    
+    # Resolve parameters with priority: explicit arg > config > env var > default
+    if model is None:
+        if config:
+            model = config.model.model
+        else:
+            model = os.environ.get("OPENAI_MODEL", "gpt-4o")
+    
+    if temperature is None:
+        if config:
+            temperature = config.model.temperature
+        else:
+            temperature = float(os.environ.get("OPENAI_TEMPERATURE", "0.1"))
+    
+    if max_tokens is None and config:
+        max_tokens = config.model.max_tokens
 
     messages = []
 
@@ -65,11 +107,24 @@ def call_llm(
     # Add current prompt
     messages.append({"role": "user", "content": prompt})
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=messages,
-        temperature=temperature,
-    )
+    # Build API call kwargs
+    api_kwargs = {
+        "model": model,
+        "messages": messages,
+        "temperature": temperature,
+    }
+    
+    # Add optional parameters if set
+    if max_tokens is not None:
+        api_kwargs["max_tokens"] = max_tokens
+    if top_p is not None and top_p != 1.0:  # Only add if non-default
+        api_kwargs["top_p"] = top_p
+    if frequency_penalty is not None and frequency_penalty != 0.0:
+        api_kwargs["frequency_penalty"] = frequency_penalty
+    if presence_penalty is not None and presence_penalty != 0.0:
+        api_kwargs["presence_penalty"] = presence_penalty
+
+    response = client.chat.completions.create(**api_kwargs)
 
     return response.choices[0].message.content
 

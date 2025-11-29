@@ -7,6 +7,7 @@ in the background while Streamlit updates the UI in real-time.
 
 import threading
 import queue
+import contextvars
 from typing import Callable, Optional, Any
 from dataclasses import dataclass
 from enum import Enum
@@ -121,20 +122,20 @@ class StreamingCallback:
         return self._complete.is_set()
 
 
-# Global callback instance for the current request
-# This is set by the Streamlit app before running a flow
-_current_callback: Optional[StreamingCallback] = None
+# Thread-safe callback storage using contextvars
+_current_callback: contextvars.ContextVar[Optional[StreamingCallback]] = contextvars.ContextVar(
+    '_current_callback', default=None
+)
 
 
 def set_streaming_callback(callback: Optional[StreamingCallback]):
-    """Set the current streaming callback for node logging."""
-    global _current_callback
-    _current_callback = callback
+    """Set the current streaming callback (thread-safe via contextvars)."""
+    _current_callback.set(callback)
 
 
 def get_streaming_callback() -> Optional[StreamingCallback]:
-    """Get the current streaming callback."""
-    return _current_callback
+    """Get the current streaming callback (thread-safe via contextvars)."""
+    return _current_callback.get()
 
 
 def log_thinking_streaming(shared: dict, step_type: str, content: str):
